@@ -1,6 +1,6 @@
 <?php
 
-namespace BeeDelivery\GoogleMaps;
+namespace BeeDelivery\GoogleMaps\Services;
 
 use BeeDelivery\GoogleMaps\Utils\Connection;
 use BeeDelivery\GoogleMaps\Utils\HelpersPlaces;

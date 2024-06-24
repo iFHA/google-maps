@@ -2,7 +2,11 @@
 
 namespace BeeDelivery\GoogleMaps;
 
+use BeeDelivery\GoogleMaps\Services\Autocomplete;
+use BeeDelivery\GoogleMaps\Services\Directions;
 use BeeDelivery\GoogleMaps\Services\Geocoding;
+use BeeDelivery\GoogleMaps\Services\Places;
+use BeeDelivery\GoogleMaps\Services\Routes;
 
 class GoogleMaps
 {
@@ -19,5 +23,15 @@ class GoogleMaps
     public function routes()
     {
         return new Routes();
+    }
+
+    public function autocomplete()
+    {
+        return new Autocomplete();
+    }
+
+    public function directions()
+    {
+        return new Directions();
     }
 }
