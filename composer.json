@@ -1,0 +1,44 @@
+{
+    "name": "beedelivery/google-maps",
+    "description": "Laravel package that helps to use GoogleMaps",
+    "keywords": [
+        "beedelivery",
+        "google-maps"
+    ],
+    "homepage": "https://github.com/bee-delivery/google-maps",
+    "license": "MIT",
+    "type": "library",
+    "authors": [{
+        "name": "Jorzel Alves",
+        "email": "jorzelalves@hotmail.com",
+        "role": "Developer"
+    }],
+    "require": {
+        "php": "^8.1"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^6.0",
+        "phpunit/phpunit": "^9.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "BeeDelivery\\GoogleMaps\\": "src/",
+            "BeeDelivery\\GoogleMaps\\Services\\": "src/Services/",
+            "BeeDelivery\\GoogleMaps\\Utils\\": "Utils/",
+            "Tests\\": "tests/"
+        }
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "BeeDelivery\\GoogleMaps\\GoogleMapsServiceProvider"
+            ],
+            "aliases": {
+                "GoogleMaps": "BeeDelivery\\GoogleMaps\\Facades\\GoogleMaps"
+            }
+        }
+    }
+}
