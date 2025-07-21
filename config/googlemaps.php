@@ -6,8 +6,8 @@
 return [
     'key' => env('GOOGLE_MAPS_KEY'),
     'geocoding_url' => 'https://maps.googleapis.com/maps/api/geocode/json?',
-    'places_url' => 'https://maps.googleapis.com/maps/api/place/textsearch/json?',
-    'autocomplete_url' => 'https://maps.googleapis.com/maps/api/place/autocomplete/json?',
-    'directions_url' => 'https://maps.googleapis.com/maps/api/directions/json?',
-    'routes_url' => 'https://maps.googleapis.com/maps/api/directions/json?'
+    'places_url' => 'https://places.googleapis.com/v1/places:searchText',
+    'autocomplete_url' => 'https://places.googleapis.com/v1/places:autocomplete',
+    'directions_url' => 'https://routes.googleapis.com/directions/v2:computeRoutes',
+    'routes_url' => 'https://routes.googleapis.com/directions/v2:computeRoutes'
 ];

@@ -4,81 +4,55 @@ namespace BeeDelivery\GoogleMaps\Utils;
 
 trait HelpersPlaces
 {
-    public function formatGeoCodeRequest($search, $type, $restrictions = null, $restrictionType = null)
+    public function url()
     {
-        $searchUrl = match ($type) {
-            'place_id' => 'place_id=' . $search,
-            'address'  => 'address=' . $search,
-            'latlng'   => 'latlng=' . $search,
-        };
-
-        $restrictionsUrl = match ($restrictionType) {
-            null => '',
-            'city' => '&components=administrative_area:' . $restrictions . '|country:Brasil',
-            'postal_code' => '&components=postal_code:' . $restrictions
-        };
-
-        return config('googlemaps.base_url') . $searchUrl . $restrictionsUrl;
+        return config('googlemaps.places_url');
     }
 
-    public function formatGeoCodeResponse($response)
+    public function formatFieldMask(bool $displayName): string
     {
-        $addresses = ['addresses' => []];
-        if ($response['status'] == 'ZERO_RESULTS')
-            return $addresses;
+        return 'places.formattedAddress,places.priceLevel,places.location' . ($displayName ? ',places.displayName' : '');
+    }
 
-        foreach ($response['results'] as $result) {
+    public function formatRequest(string $textQuery, string $regionCode = 'br'): array
+    {
+        return [
+            'textQuery' => $textQuery,
+            'regionCode' => $regionCode,
+        ];
+    }
+
+    public function formatResponse(array $response): array
+    {
+        if (isset($response['error'])) {
+            return [
+                'code' => $response['error']['code'],
+                'message' => $response['error']['message']
+            ];
+        }
+
+
+        $addresses = ['addresses' => []];
+
+        foreach ($response['places'] as $result) {
             $addresses['addresses'][] = $this->mapAddressComponents($result);
         }
 
         return $addresses;
     }
 
-    private function mapAddressComponents($result)
+    private function mapAddressComponents(array $result): array
     {
         $componentsMap = [
-            'route' => 'addressStreet',
-            'street_number' => 'addressNumber',
-            'sublocality_level_1' => 'addressNeiborhood',
-            'administrative_area_level_2' => 'addressCity',
-            'administrative_area_level_1' => 'addressState',
-            'country' => 'addressCountry',
-            'postal_code' => 'addressPostalCode',
+            'formattedAddress' => $result['formattedAddress'],
+            'lat' => $result['location']['latitude'],
+            'lng' => $result['location']['longitude'],
         ];
 
-        $addressStreet = $addressNumber = $addressNeiborhood = $addressCity = $addressState = $addressCountry = $addressPostalCode = '';
-
-        foreach ($result['address_components'] as $address) {
-            foreach ($address['types'] as $type) {
-                $variableName = match ($type) {
-                    'route', 'street_number', 'sublocality_level_1', 'administrative_area_level_2', 'administrative_area_level_1', 'country', 'postal_code' => $componentsMap[$type],
-                    default => null,
-                };
-
-                if ($variableName) {
-                    if ($type === 'administrative_area_level_1') {
-                        $$variableName = $address['short_name'];
-                    } else {
-                        $$variableName = $address['long_name'];
-                    }
-                }
-            }
+        if (isset($result['displayName'])) {
+            $componentsMap['displayName'] = $result['displayName']['text'];
         }
-        return [
-            'address' => [
-                'street' => $addressStreet ?? '',
-                'number' => $addressNumber ?? '',
-                'neighborhood' => $addressNeiborhood ?? '',
-                'zipcode' => str_replace('-', '', $addressPostalCode ?? ''),
-                'complement' => '',
-                'city' => $addressCity ?? '',
-                'state' => $addressState ?? '',
-                'country' => $addressCountry ?? '',
-                'formatted' => $result['formatted_address'],
-            ],
-            'lat' => $result['geometry']['location']['lat'],
-            'lng' => $result['geometry']['location']['lng'],
-            'partial' => isset($result["partial_match"])
-        ];
+
+        return $componentsMap;
     }
 }

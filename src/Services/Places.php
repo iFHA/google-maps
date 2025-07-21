@@ -25,8 +25,26 @@ class Places
      * @param array $params
      * @return array
      */
-    public function places($data)
+    public function places(string $textQuery, bool $displayName = false, string $regionCode = 'br'): array
     {
-        //TODO: in progress
+        try {
+            if ($regionCode == '') {
+                throw new \Exception('The region code is required');
+            }
+
+            return $this->formatResponse(
+                $this->http->post(
+                    $this->url(),
+                    $this->formatRequest($textQuery, $regionCode),
+                    $this->formatFieldMask($displayName)
+                )
+            );
+
+        } catch (\Exception $e) {
+            return [
+                'code' => $e->getCode(),
+                'response' => $e->getMessage()
+            ];
+        }
     }
 }

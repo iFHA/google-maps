@@ -43,4 +43,30 @@ class Connection
             ];
         }
     }
+
+    /*
+     * Realiza uma solicitação post padrão utilizando
+     * Bearer Authentication.
+     *
+     * @param string $url
+     * @param array $data
+     * @return array
+     */
+    public function post(string $url, array $data, string $fieldMask = '*')
+    {
+        try {
+            $response = Http::withHeaders([
+                'Content-Type' => 'application/json',
+                'X-Goog-Api-Key' => $this->key,
+                'X-Goog-FieldMask' => $fieldMask,
+            ])->post($url, $data);
+
+            return json_decode($response->getBody(), true);
+        } catch (\Exception $e) {
+            return [
+                'code' => $e->getCode(),
+                'response' => $e->getMessage()
+            ];
+        }
+    }
 }
