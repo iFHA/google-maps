@@ -26,7 +26,6 @@ trait HelpersDirections
         } else {
             $dataSearch = $this->formatForMoreThatTwoWaypointsOptimize($waypoints, $optimize, $mode);
         }
-        dd($dataSearch);
 
         $dataSearch['optimizeWaypointOrder'] = $optimize;
         $dataSearch['travelMode'] = $mode;
