@@ -6,67 +6,96 @@ use Exception;
 
 trait HelpersDirections
 {
-    public function formatRequest($waypoints, $optimize, $mode)
+    public function url()
     {
-        $optimize = $optimize ? 'true' : 'false';
+        return config('googlemaps.directions_url');
+    }
 
+    public function formatFieldMask(bool $optimize): string
+    {
+        $fieldMask = 'routes.distanceMeters,routes.duration';
+        return $optimize ? $fieldMask . ',routes.optimizedIntermediateWaypointIndex' : $fieldMask;
+    }
+
+    public function formatRequest(array $waypoints, bool $optimize, string $mode): array
+    {
         if (count($waypoints) < 2) {
             throw new \Exception('You must provide at least two waypoints');
         } elseif (count($waypoints) == 2) {
-            $searchUrl = $this->formatForTwoWaypoints($waypoints, $mode);
+            $dataSearch = $this->formatForTwoWaypoints($waypoints, $mode);
         } else {
-            $searchUrl = $this->formatForMoreThatTwoWaypointsOptimize($waypoints, $optimize, $mode);
+            $dataSearch = $this->formatForMoreThatTwoWaypointsOptimize($waypoints, $optimize, $mode);
         }
-        
-        return config('googlemaps.directions_url') . $searchUrl;
+        dd($dataSearch);
+
+        $dataSearch['optimizeWaypointOrder'] = $optimize;
+        $dataSearch['travelMode'] = $mode;
+
+        return $dataSearch;
     }
 
-    public function formatResponse($response)
+    public function formatResponse(array $response): array
     {
-        $distance = 0;
-        $duration = 0;
+        $distance = (int) $response['routes'][0]['distanceMeters'] ?? 0;
+        $duration = (int) $response['routes'][0]['duration'] ?? 0;
 
-        if ($response['status'] == 'OK' and isset($response['routes'][0]['legs'])) {
-            foreach ($response['routes'][0]['legs'] as $key => $item) {
-                $distance += ($item['distance']['value']);
-                $duration += ($item['duration']['value']);
-            }
-
-            return [
-                'distance' => $distance,
-                'distance_in_quilometers' => number_format(($distance / 1000), 2),
-                'duration_in_seconds' => $duration,
-                'duration_in_minutes' => number_format(($duration / 60), 2),
-                'waypoint_order' => $response['routes'][0]['waypoint_order'] ?? '',
-            ];
-        } elseif ($response['status'] == 'ZERO_RESULTS') {
+        if ($distance == 0) {
             throw new Exception('Distance can not be zero', 404);
         }
+
+        $response = [
+            'distance' => $distance,
+            'distance_in_quilometers' => number_format(($distance / 1000), 2),
+            'duration_in_seconds' => $duration,
+            'duration_in_minutes' => number_format(($duration / 60), 2),
+            'waypoint_order' => $response['routes'][0]['optimizedIntermediateWaypointIndex'] ?? '',
+        ];
+
+        return $response;
     }
 
-    private function formatForTwoWaypoints($waypoints, $mode)
+    private function formatForTwoWaypoints(array $waypoints): array
     {
         $origin = $waypoints[0];
         $destination = $waypoints[count($waypoints) - 1];
 
-        // Construir a string de consulta
-        return http_build_query([
-            'mode' => $mode,
-            'origin' => $origin['lat'] . ',' . $origin['lng'],
-            'destination' => $destination['lat'] . ',' . $destination['lng'],
-        ]);
+        return [
+            'origin' => [
+                'location' => [
+                    'latLng' => [
+                        'latitude' => $origin['lat'],
+                        'longitude' => $origin['lng']
+                    ]
+                ]
+            ],
+            'destination' => [
+                'location' => [
+                    'latLng' => [
+                        'latitude' => $destination['lat'],
+                        'longitude' => $destination['lng']
+                    ]
+                ]
+            ],
+        ];
     }
 
-    private function formatForMoreThatTwoWaypointsOptimize($waypoints, $optimize, $mode)
+    private function formatForMoreThatTwoWaypointsOptimize(array $waypoints): array
     {
-        $search = $this->formatForTwoWaypoints($waypoints, $mode);
+        $dataSearch = $this->formatForTwoWaypoints($waypoints);
         // Adicionar pontos intermediários, se houver mais de dois
         $intermediateWaypoints = array_slice($waypoints, 1, -1);
-        $intermediatePoints = [];
+
         foreach ($intermediateWaypoints as $waypoint) {
-            $intermediatePoints[] = $waypoint['lat'] . ',' . $waypoint['lng'];
+            $dataSearch['intermediates'][] = [
+                'location' => [
+                    'latLng' => [
+                        'latitude' => $waypoint['lat'],
+                        'longitude' => $waypoint['lng']
+                    ]
+                ]
+            ];
         }
-        $search .= '&waypoints=optimize:' .  $optimize . '|' . implode('|', $intermediatePoints);
-        return $search;
+
+        return $dataSearch;
     }
 }

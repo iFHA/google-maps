@@ -24,11 +24,18 @@ class Directions
     /*     
      * @param array $params
      * @return array
+     * @throws \Exception
      */
-    public function directions($waypoints, $optimize =  false, $mode = 'driving')
+    public function directions(array $waypoints, bool $optimize =  true, string $mode = 'DRIVE'): array
     {
         try {
-            return $this->formatResponse($this->http->get($this->formatRequest($waypoints, $optimize, $mode)));
+            return $this->formatResponse(
+                $this->http->post(
+                    $this->url(),
+                    $this->formatRequest($waypoints, $optimize, $mode),
+                    $this->formatFieldMask($optimize)
+                )
+            );
         } catch (\Exception $e) {
             return [
                 'code' => $e->getCode(),

@@ -13,7 +13,6 @@ class DirectionsTest extends TestCase
      */
     public function testExample()
     {
-        dd(config('googlemaps.key'));
         $geoCode = new Directions();
         $waypoints = [
             ['lat' => -5.5505199, 'lng' => -37.6333094],            
@@ -26,6 +25,6 @@ class DirectionsTest extends TestCase
             ['lat' => -5.5213193, 'lng' => -37.142341],
             
         ];
-        dd($geoCode->directions($waypoints, false, 'driving'));
+        dd($geoCode->directions($waypoints, false), $geoCode->directions($waypoints));
     }
 }
