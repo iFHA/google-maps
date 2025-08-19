@@ -26,13 +26,13 @@ class Routes
      * @return array
      * @throws \Exception
      */
-    public function routes(array $waypoints, bool $optimize =  true, string $mode = 'DRIVE'): array
+    public function routes(array $origin, array $destination, array $waypoints = [], bool $optimize =  true, string $mode = 'DRIVE'): array
     {
         try {
             return $this->formatResponse(
                 $this->http->post(
                     $this->url(),
-                    $this->formatRequest($waypoints, $optimize, $mode),
+                    $this->formatRequest($origin, $destination, $waypoints, $optimize, $mode),
                     $this->formatFieldMask($optimize)
                 )
             );

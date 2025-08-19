@@ -17,15 +17,42 @@ trait HelpersRoutes
         return $optimize ? $fieldMask . ',routes.optimizedIntermediateWaypointIndex' : $fieldMask;
     }
 
-    public function formatRequest(array $waypoints, bool $optimize, string $mode): array
+    public function formatRequest(array $origin, array $destination, array $waypoints, bool $optimize, string $mode): array
     {
         if (count($waypoints) < 2) {
             throw new \Exception('You must provide at least two waypoints');
-        } elseif (count($waypoints) == 2) {
-            $dataSearch = $this->formatForTwoWaypoints($waypoints, $mode);
-        } else {
-            $dataSearch = $this->formatForMoreThatTwoWaypointsOptimize($waypoints, $optimize, $mode);
         }
+
+        $dataSearch = [];
+
+        $dataSearch['origin'] = [
+            'location' => [
+                'latLng' => [
+                    'latitude' => $origin['lat'],
+                    'longitude' => $origin['lng']
+                ]
+            ]
+        ];
+
+        foreach ($waypoints as $waypoint) {
+            $dataSearch['intermediates'][] = [
+                'location' => [
+                    'latLng' => [
+                        'latitude' => $waypoint['lat'],
+                        'longitude' => $waypoint['lng']
+                    ]
+                ]
+            ];
+        }
+
+        $dataSearch['destination'] = [
+            'location' => [
+                'latLng' => [
+                    'latitude' => $destination['lat'],
+                    'longitude' => $destination['lng']
+                ]
+            ]
+        ];
 
         $dataSearch['optimizeWaypointOrder'] = $optimize;
         $dataSearch['travelMode'] = $mode;
@@ -51,50 +78,5 @@ trait HelpersRoutes
         ];
 
         return $response;
-    }
-
-    private function formatForTwoWaypoints(array $waypoints): array
-    {
-        $origin = $waypoints[0];
-        $destination = $waypoints[count($waypoints) - 1];
-
-        return [
-            'origin' => [
-                'location' => [
-                    'latLng' => [
-                        'latitude' => $origin['lat'],
-                        'longitude' => $origin['lng']
-                    ]
-                ]
-            ],
-            'destination' => [
-                'location' => [
-                    'latLng' => [
-                        'latitude' => $destination['lat'],
-                        'longitude' => $destination['lng']
-                    ]
-                ]
-            ],
-        ];
-    }
-
-    private function formatForMoreThatTwoWaypointsOptimize(array $waypoints): array
-    {
-        $dataSearch = $this->formatForTwoWaypoints($waypoints);
-        // Adicionar pontos intermediários, se houver mais de dois
-        $intermediateWaypoints = array_slice($waypoints, 1, -1);
-
-        foreach ($intermediateWaypoints as $waypoint) {
-            $dataSearch['intermediates'][] = [
-                'location' => [
-                    'latLng' => [
-                        'latitude' => $waypoint['lat'],
-                        'longitude' => $waypoint['lng']
-                    ]
-                ]
-            ];
-        }
-
-        return $dataSearch;
     }
 }
