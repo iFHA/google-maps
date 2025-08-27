@@ -35,7 +35,6 @@ trait HelpersDirections
 
     public function formatResponse(array $response): array
     {
-        // Verificar se a chave 'routes' existe e não está vazia
         if (!isset($response['routes']) || empty($response['routes'])) {
             throw new Exception('No routes found in response', 404);
         }
