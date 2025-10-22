@@ -9,5 +9,6 @@ return [
     'places_url' => 'https://places.googleapis.com/v1/places:searchText',
     'autocomplete_url' => 'https://places.googleapis.com/v1/places:autocomplete',
     'directions_url' => 'https://routes.googleapis.com/directions/v2:computeRoutes',
-    'routes_url' => 'https://routes.googleapis.com/directions/v2:computeRoutes'
+    'routes_url' => 'https://routes.googleapis.com/directions/v2:computeRoutes',
+    'distance_matrix_url' => 'https://routes.googleapis.com/distanceMatrix/v2:computeRouteMatrix',
 ];
