@@ -12,7 +12,7 @@ return [
     'routes_url' => 'https://routes.googleapis.com/directions/v2:computeRoutes',
     'distance_matrix_url' => 'https://routes.googleapis.com/distanceMatrix/v2:computeRouteMatrix',
     'waypoints_optimizer_by_distance_preferred_api' => env('WAYPOINTS_OPTIMIZER_BY_DISTANCE_PREFERRED_API', 'route_matrix'),
-    'route_optimization' => [
+    'route_optimization_api' => [
         'url' => 'https://routeoptimization.googleapis.com/v1/projects/:projectId:optimizeTours',
         'scope' => 'https://www.googleapis.com/auth/cloud-platform',
         'service_account_credentials' => [
