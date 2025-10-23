@@ -80,7 +80,7 @@ class WaypointsOptimizerByRouteMatrixDistance implements WaypointsOptimizer
     
     private function getClosestWaypointTo(int $originWaypointIndex, array $routeMatrix, int $destinationWaypointIndex, array $visitedIndexes): RouteMatrixResponseDTO
     {
-        $closest = array_reduce($routeMatrix, function ($carry, RouteMatrixResponseDTO $item) use (
+        return array_reduce($routeMatrix, function ($carry, RouteMatrixResponseDTO $item) use (
             $originWaypointIndex, $visitedIndexes, $destinationWaypointIndex) {
             $isFirstElement = $carry === null;
             $isOriginWaypoint = $item->originIndex === $originWaypointIndex;
@@ -102,7 +102,6 @@ class WaypointsOptimizerByRouteMatrixDistance implements WaypointsOptimizer
             }
             return $carry;
         });
-        return RouteMatrixResponseDTO::fromResponse($closest);
     }
     
 }
