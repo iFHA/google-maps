@@ -7,6 +7,7 @@ use BeeDelivery\GoogleMaps\DTOs\OptimizeWaypointsDTO;
 use BeeDelivery\GoogleMaps\DTOs\RouteMatrixResponseDTO;
 use BeeDelivery\GoogleMaps\DTOs\WaypointDTO;
 use BeeDelivery\GoogleMaps\Enums\RouteTravelModeEnum;
+use BeeDelivery\GoogleMaps\Enums\WaypointsOptimizerType;
 use BeeDelivery\GoogleMaps\Services\Contracts\WaypointsOptimizer;
 use BeeDelivery\GoogleMaps\Services\RouteMatrix;
 use Exception;
@@ -81,7 +82,8 @@ class WaypointsOptimizerByRouteMatrixDistance implements WaypointsOptimizer
             $distanceInKilometers,
             $durationInSeconds,
             $durationInMinutes,
-            $optimizedWaypointsOrdered
+            WaypointsOptimizerType::MIN_DISTANCE,
+            $optimizedWaypointsOrdered,
         );
     }
 

@@ -4,6 +4,7 @@ namespace BeeDelivery\GoogleMaps\Services\Impl;
 use BeeDelivery\GoogleMaps\DTOs\OptimizedWaypointsDTO;
 use BeeDelivery\GoogleMaps\DTOs\OptimizeWaypointsDTO;
 use BeeDelivery\GoogleMaps\DTOs\WaypointDTO;
+use BeeDelivery\GoogleMaps\Enums\WaypointsOptimizerType;
 use BeeDelivery\GoogleMaps\Services\Contracts\WaypointsOptimizer;
 use BeeDelivery\GoogleMaps\Services\Routes;
 use Exception;
@@ -39,6 +40,7 @@ class WaypointsOptimizerByTravelTime implements WaypointsOptimizer
             distanceInKilometers: $response['distance_in_quilometers'],
             durationInSeconds: $response['duration_in_seconds'],
             durationInMinutes: $response['duration_in_minutes'],
+            optimizationType: WaypointsOptimizerType::MIN_TRAVEL_TIME,
             intermediateWaypointsOrder: $response['waypoint_order'],
         );
     }

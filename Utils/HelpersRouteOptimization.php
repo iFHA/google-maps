@@ -12,6 +12,14 @@ trait HelpersRouteOptimization
     {
         $url = config('googlemaps.route_optimization_api.url');
         $projectId = config('googlemaps.route_optimization_api.service_account_credentials.project_id');
+        
+        if(empty($url)) {
+            throw new Exception('Route optimization API URL is not set', 500);
+        }
+        
+        if(empty($projectId)) {
+            throw new Exception('Route optimization API project ID is not set', 500);
+        }
 
         return str_replace(':projectId', $projectId, $url);
     }
@@ -90,6 +98,7 @@ trait HelpersRouteOptimization
             distanceInKilometers: $distanceInKilometers,
             durationInSeconds: $durationInSeconds,
             durationInMinutes: $durationInMinutes,
+            optimizationType: $this->type,
             intermediateWaypointsOrder: $this->extractIntermediateWaypointOrderFromResponse($response),
         );
     }
