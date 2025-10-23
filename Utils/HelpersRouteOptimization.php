@@ -11,7 +11,7 @@ trait HelpersRouteOptimization
     public function url()
     {
         $url = config('googlemaps.route_optimization_api.url');
-        $projectId = config('googlemaps.route_optimization.service_account_credentials.project_id');
+        $projectId = config('googlemaps.route_optimization.service_account_credentials_api.project_id');
 
         return str_replace(':projectId', $projectId, $url);
     }
