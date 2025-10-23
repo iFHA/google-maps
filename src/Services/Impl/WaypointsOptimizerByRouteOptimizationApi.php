@@ -23,7 +23,7 @@ class WaypointsOptimizerByRouteOptimizationApi implements WaypointsOptimizer
     {
         $this->http = new Connection();
         $this->apiClient = new Client();
-        $this->apiClient->setAuthConfig('googlemaps.route_optimization_api.service_account_credentials');
+        $this->apiClient->setAuthConfig(config('googlemaps.route_optimization_api.service_account_credentials'));
         $this->apiClient->addScope(config('googlemaps.route_optimization_api.scope'));
     }
     
