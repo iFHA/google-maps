@@ -52,18 +52,21 @@ class Connection
      * @param array $data
      * @return array
      */
-    public function post(string $url, array $data, string $fieldMask = '*')
+    public function post(string $url, array $data, string $fieldMask = '*', array $headers = [])
     {
-        try {
-            $response = Http::withHeaders([
+        if (empty($headers)) {
+            $headers = [
                 'Content-Type' => 'application/json',
                 'X-Goog-Api-Key' => $this->key,
                 'X-Goog-FieldMask' => $fieldMask,
-            ])->post($url, $data);
-
+            ];
+        }
+        try {
+            $response = Http::withHeaders($headers)->post($url, $data);
             return json_decode($response->getBody(), true);
         } catch (\Exception $e) {
             return [
+                'error' => true,
                 'code' => $e->getCode(),
                 'response' => $e->getMessage()
             ];
