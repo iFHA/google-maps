@@ -12,7 +12,7 @@ trait HelpersRouteOptimization
     {
         $url = config('googlemaps.route_optimization_api.url');
         $projectId = config('googlemaps.route_optimization.service_account_credentials.project_id');
-        
+
         return str_replace(':projectId', $projectId, $url);
     }
 
@@ -42,7 +42,7 @@ trait HelpersRouteOptimization
             "searchMode" => "SEARCH_MODE_UNSPECIFIED",
             "considerRoadTraffic" => false
         ];
-        
+
         if ($this->type === RouteOptimizationTypeEnum::MIN_TRAVEL_TIME) {
             unset($dataSearch['model']['vehicles'][0]['costPerKilometer']);
             $dataSearch['model']['vehicles'][0]['costPerHour'] = 1;
@@ -84,16 +84,16 @@ trait HelpersRouteOptimization
 
         $distanceInKilometers = round(($distanceInMeters / 1000), 2);
         $durationInMinutes = round(($durationInSeconds / 60), 2);
-        
+
         return new OptimizedWaypointsDTO(
             distanceInMeters: $distanceInMeters,
             distanceInKilometers: $distanceInKilometers,
             durationInSeconds: $durationInSeconds,
             durationInMinutes: $durationInMinutes,
-            waypointsOrder: $this->extractIntermediateWaypointOrderFromResponse($response),
+            intermediateWaypointsOrder: $this->extractIntermediateWaypointOrderFromResponse($response),
         );
     }
-    
+
     private function extractIntermediateWaypointOrderFromResponse(array $response): array
     {
         return array_map(fn($visit) => $visit['shipmentIndex'] ?? 0, $response['routes'][0]['visits']);

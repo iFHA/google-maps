@@ -57,6 +57,7 @@ class WaypointsOptimizerByRouteMatrixDistance implements WaypointsOptimizer
         $optimizedWaypointsOrdered = [];
         $index = $distanceInMeters = $durationInSeconds = 0;
         $visitedIndexes = [];
+
         while (count($optimizedWaypointsOrdered) < $intermediateWaypointsCount) {
             $closestWaypoint = $this->getClosestWaypointTo($index, $routeMatrix, $destinationWaypointIndex, $visitedIndexes);
             $distanceInMeters += $closestWaypoint->distanceMeters;
@@ -65,10 +66,16 @@ class WaypointsOptimizerByRouteMatrixDistance implements WaypointsOptimizer
             $index = $closestWaypoint->destinationIndex;
             $optimizedWaypointsOrdered[] = $index;
         }
-        
+
+        $dataFromBetweenLastIntermediateWaypointAndDestination = $this->getDataFromRouteMatrixBetweenTwoWaypoints($index, $destinationWaypointIndex, $routeMatrix);
+        $distanceInMeters += $dataFromBetweenLastIntermediateWaypointAndDestination->distanceMeters;
+        $durationInSeconds += $dataFromBetweenLastIntermediateWaypointAndDestination->durationInSeconds;
+
         $distanceInKilometers = round($distanceInMeters / 1000, 2);
         $durationInMinutes = round($durationInSeconds / 60, 2);
-        
+
+        $optimizedWaypointsOrdered = $this->adjustOptimizedWaypointsIndexes($optimizedWaypointsOrdered);
+
         return new OptimizedWaypointsDTO(
             $distanceInMeters,
             $distanceInKilometers,
@@ -77,31 +84,51 @@ class WaypointsOptimizerByRouteMatrixDistance implements WaypointsOptimizer
             $optimizedWaypointsOrdered
         );
     }
-    
+
     private function getClosestWaypointTo(int $originWaypointIndex, array $routeMatrix, int $destinationWaypointIndex, array $visitedIndexes): RouteMatrixResponseDTO
     {
-        return array_reduce($routeMatrix, function ($carry, RouteMatrixResponseDTO $item) use (
-            $originWaypointIndex, $visitedIndexes, $destinationWaypointIndex) {
-            $isFirstElement = $carry === null;
-            $isOriginWaypoint = $item->originIndex === $originWaypointIndex;
-            $wasNotVisitedYet = !in_array($item->destinationIndex, $visitedIndexes);
-            $isNotSameAsSource = $item->destinationIndex !== $originWaypointIndex;
-            $isCloser = $carry !== null && $item->distanceMeters < $carry->distanceMeters;
-            $isNotDestinationWaypoint = $item->originIndex !== $destinationWaypointIndex;
-            if (
-                $isFirstElement ||
-                (
-                    $isOriginWaypoint  &&
-                    $isNotSameAsSource &&
-                    $wasNotVisitedYet &&
-                    $isNotDestinationWaypoint &&
-                    $isCloser
-                )
-            ) {
-                return $item;
-            }
-            return $carry;
+        $distancesFromOrigin = array_filter($routeMatrix, function (RouteMatrixResponseDTO $item) use ($originWaypointIndex, $visitedIndexes, $destinationWaypointIndex) {
+            $originIndex = $item->originIndex;
+            $isOrigin = $originIndex === $originWaypointIndex;
+            $destinationIndex = $item->destinationIndex;
+            $wasNotVisitedYet = !in_array($destinationIndex, $visitedIndexes);
+            $distanceToDestinationIsGreaterThanZero = $item->distanceMeters > 0;
+            $doesNotPointToDestinationWaypoint = $destinationIndex !== $destinationWaypointIndex;
+            $isNotDestinationWaypoint = $originIndex !== $destinationWaypointIndex;
+
+            return $isOrigin &&
+                $wasNotVisitedYet &&
+                $distanceToDestinationIsGreaterThanZero &&
+                $isNotDestinationWaypoint &&
+                $doesNotPointToDestinationWaypoint;
         });
+        usort($distancesFromOrigin, fn (RouteMatrixResponseDTO $a, RouteMatrixResponseDTO $b) => $a->distanceMeters <=> $b->distanceMeters);
+        return $distancesFromOrigin[0] ??
+            throw new Exception('No closest waypoint found for origin waypoint index: ' . $originWaypointIndex . ' and destination waypoint index: ' . $destinationWaypointIndex);
     }
-    
+
+    /**
+     * Get the data from the between two waypoints
+     * @param int $originWaypointIndex
+     * @param int $destinationWaypointIndex
+     * @param array<RouteMatrixResponseDTO> $routeMatrix
+     * @return RouteMatrixResponseDTO
+     */
+    private function getDataFromRouteMatrixBetweenTwoWaypoints(int $originWaypointIndex, int $destinationWaypointIndex, array $routeMatrix): RouteMatrixResponseDTO
+    {
+        $data = array_filter($routeMatrix, function (RouteMatrixResponseDTO $item) use ($originWaypointIndex, $destinationWaypointIndex) {
+            $originIndex = $item->originIndex;
+            $destinationIndex = $item->destinationIndex;
+            $found = $originIndex === $originWaypointIndex && $destinationIndex === $destinationWaypointIndex;
+            return $found;
+        });
+        return array_values($data)[0] ??
+            throw new Exception('No data found between origin waypoint index: ' . $originWaypointIndex . ' and destination waypoint index: ' . $destinationWaypointIndex);
+    }
+
+    private function adjustOptimizedWaypointsIndexes(array $optimizedWaypointsOrdered): array
+    {
+        return array_map(fn (int $index) => $index - 1, $optimizedWaypointsOrdered);
+    }
+
 }

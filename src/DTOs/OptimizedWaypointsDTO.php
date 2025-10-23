@@ -8,7 +8,7 @@ class OptimizedWaypointsDTO
         public readonly float $distanceInKilometers,
         public readonly int $durationInSeconds,
         public readonly float $durationInMinutes,
-        public readonly array $waypointsOrder,
+        public readonly array $intermediateWaypointsOrder,
     ) {
     }
 }

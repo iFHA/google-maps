@@ -39,7 +39,7 @@ class WaypointsOptimizerByTravelTime implements WaypointsOptimizer
             distanceInKilometers: $response['distance_in_quilometers'],
             durationInSeconds: $response['duration_in_seconds'],
             durationInMinutes: $response['duration_in_minutes'],
-            waypointsOrder: $response['waypoint_order'],
+            intermediateWaypointsOrder: $response['waypoint_order'],
         );
     }
 }
