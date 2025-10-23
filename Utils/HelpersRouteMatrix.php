@@ -15,7 +15,7 @@ trait HelpersRouteMatrix
 
     public function formatFieldMask(): string
     {
-        return 'originIndex,destinationIndex,distanceMeters';
+        return 'originIndex,duration,destinationIndex,distanceMeters';
     }
 
     /**
