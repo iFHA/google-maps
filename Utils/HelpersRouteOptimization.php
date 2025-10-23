@@ -98,7 +98,7 @@ trait HelpersRouteOptimization
             distanceInKilometers: $distanceInKilometers,
             durationInSeconds: $durationInSeconds,
             durationInMinutes: $durationInMinutes,
-            optimizationType: $this->type,
+            optimizationType: $this->type->toOptimizerWaypointsType(),
             intermediateWaypointsOrder: $this->extractIntermediateWaypointOrderFromResponse($response),
         );
     }
