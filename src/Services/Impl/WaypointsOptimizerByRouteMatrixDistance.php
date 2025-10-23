@@ -80,14 +80,14 @@ class WaypointsOptimizerByRouteMatrixDistance implements WaypointsOptimizer
     
     private function getClosestWaypointTo(int $originWaypointIndex, array $routeMatrix, int $destinationWaypointIndex, array $visitedIndexes): RouteMatrixResponseDTO
     {
-        $closest = array_reduce($routeMatrix, function ($carry, $item) use (
+        $closest = array_reduce($routeMatrix, function ($carry, RouteMatrixResponseDTO $item) use (
             $originWaypointIndex, $visitedIndexes, $destinationWaypointIndex) {
             $isFirstElement = $carry === null;
-            $isOriginWaypoint = $item['originIndex'] === $originWaypointIndex;
-            $wasNotVisitedYet = !in_array($item['destinationIndex'], $visitedIndexes);
-            $isNotSameAsSource = $item['destinationIndex'] !== $originWaypointIndex;
-            $isCloser = $item['distanceMeters'] < $carry['distanceMeters'] ?? 0;
-            $isNotDestinationWaypoint = $item['originIndex'] !== $destinationWaypointIndex;
+            $isOriginWaypoint = $item->originIndex === $originWaypointIndex;
+            $wasNotVisitedYet = !in_array($item->destinationIndex, $visitedIndexes);
+            $isNotSameAsSource = $item->destinationIndex !== $originWaypointIndex;
+            $isCloser = $carry !== null && $item->distanceMeters < $carry->distanceMeters;
+            $isNotDestinationWaypoint = $item->originIndex !== $destinationWaypointIndex;
             if (
                 $isFirstElement ||
                 (
