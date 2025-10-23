@@ -3,19 +3,16 @@
 namespace BeeDelivery\GoogleMaps\Services\Contracts;
 
 use BeeDelivery\GoogleMaps\DTOs\OptimizedWaypointsDTO;
-use BeeDelivery\GoogleMaps\DTOs\WaypointDTO;
-use BeeDelivery\GoogleMaps\Enums\RouteTravelModeEnum;
+use BeeDelivery\GoogleMaps\DTOs\OptimizeWaypointsDTO;
+use Exception;
 
 interface WaypointsOptimizer
 {
     /**
      * Optimize the waypoints
-     * @param WaypointDTO $origin
-     * @param WaypointDTO $destination
-     * @param array<WaypointDTO> $waypoints
-     * @param RouteTravelModeEnum $mode
-     * @return OptimizedWaypointsDTO
+     * @param OptimizeWaypointsDTO $optimizeWaypointsDTO waypoints to optimize
+     * @return OptimizedWaypointsDTO optimized waypoints
      * @throws Exception
      */
-    public function optimize(WaypointDTO $origin, WaypointDTO $destination, array $waypoints = [], RouteTravelModeEnum $mode = RouteTravelModeEnum::DRIVE): OptimizedWaypointsDTO;
+    public function optimize(OptimizeWaypointsDTO $optimizeWaypointsDTO): OptimizedWaypointsDTO;
 }
