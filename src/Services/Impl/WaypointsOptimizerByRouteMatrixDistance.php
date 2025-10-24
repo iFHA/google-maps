@@ -23,7 +23,7 @@ class WaypointsOptimizerByRouteMatrixDistance implements WaypointsOptimizer
     }
 
     /**
-     * Summary of optimizeWaypointsByDistance
+     * Optimize the waypoints by distance using the route matrix API
      * @param WaypointDTO $origin
      * @param WaypointDTO $destination
      * @param array<WaypointDTO> $waypoints
