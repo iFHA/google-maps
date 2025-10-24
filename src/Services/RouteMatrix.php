@@ -20,7 +20,7 @@ class RouteMatrix
     }
     
     /**
-     * Summary of getRouteMatrix
+     * Get the route matrix from the Google Maps API
      * @param array<WaypointDTO> $origins
      * @param array<WaypointDTO> $destinations
      * @param RouteTravelModeEnum $mode
