@@ -4,10 +4,9 @@ namespace BeeDelivery\GoogleMaps\Services;
 use BeeDelivery\GoogleMaps\DTOs\RouteMatrixResponseDTO;
 use BeeDelivery\GoogleMaps\DTOs\WaypointDTO;
 use BeeDelivery\GoogleMaps\Enums\RouteTravelModeEnum;
+use BeeDelivery\GoogleMaps\Exceptions\RouteMatrixException;
 use BeeDelivery\GoogleMaps\Utils\Connection;
 use BeeDelivery\GoogleMaps\Utils\HelpersRouteMatrix;
-use Exception;
-
 class RouteMatrix
 {
     use HelpersRouteMatrix;
@@ -25,7 +24,7 @@ class RouteMatrix
      * @param array<WaypointDTO> $destinations
      * @param RouteTravelModeEnum $mode
      * @return array<RouteMatrixResponseDTO>
-     * @throws Exception when the response is null or the response code is not 200
+     * @throws RouteMatrixException when the response is null or the response has an error
      */
     public function getRouteMatrix(array $origins, array $destinations, RouteTravelModeEnum $mode = RouteTravelModeEnum::DRIVE): array
     {
@@ -34,8 +33,8 @@ class RouteMatrix
             $this->formatRequest($origins, $destinations, $mode),
             $this->formatFieldMask()
         );
-        if(is_null($response) || isset($response['code'])) {
-            throw new Exception($response['response'] ?? 'Error on getting route matrix', $response['code'] ?? 500);
+        if(is_null($response) || ($response['error'] ?? false)) {
+            throw new RouteMatrixException($response['response'] ?? 'Error on getting route matrix');
         }
         return array_map(fn (array $response) => RouteMatrixResponseDTO::fromResponse($response), $response);
     }

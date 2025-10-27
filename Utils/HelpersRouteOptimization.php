@@ -4,21 +4,28 @@ namespace BeeDelivery\GoogleMaps\Utils;
 use BeeDelivery\GoogleMaps\DTOs\OptimizedWaypointsDTO;
 use BeeDelivery\GoogleMaps\DTOs\OptimizeWaypointsDTO;
 use BeeDelivery\GoogleMaps\Enums\RouteOptimizationTypeEnum;
-use Exception;
+use BeeDelivery\GoogleMaps\Exceptions\RouteOptimizationException;
+use Illuminate\Support\Arr;
 
 trait HelpersRouteOptimization
 {
-    public function url()
+    
+    /**
+     * Get the URL for the route optimization API
+     * @return string
+     * @throws RouteOptimizationException when the URL or project ID is not set
+     */
+    public function url(): string
     {
         $url = config('googlemaps.route_optimization_api.url');
         $projectId = config('googlemaps.route_optimization_api.service_account_credentials.project_id');
         
         if(empty($url)) {
-            throw new Exception('Route optimization API URL is not set', 500);
+            throw new RouteOptimizationException('Route optimization API URL is not set');
         }
         
         if(empty($projectId)) {
-            throw new Exception('Route optimization API project ID is not set', 500);
+            throw new RouteOptimizationException('Route optimization API project ID is not set');
         }
 
         return str_replace(':projectId', $projectId, $url);
@@ -26,8 +33,8 @@ trait HelpersRouteOptimization
 
     public function formatRequest(OptimizeWaypointsDTO $optimizeWaypointsDTO): array
     {
-        if (count($optimizeWaypointsDTO->intermediateWaypoints) < 2) {
-            throw new Exception('You must provide at least two waypoints');
+        if (count($optimizeWaypointsDTO->intermediateWaypoints) < 1) {
+            throw new RouteOptimizationException('You must provide at least one intermediate waypoint(3 including origin and destination)');
         }
 
         $dataSearch = [
@@ -50,6 +57,10 @@ trait HelpersRouteOptimization
             "searchMode" => "SEARCH_MODE_UNSPECIFIED",
             "considerRoadTraffic" => false
         ];
+        
+        if (!isset($this->type)) {
+            throw new RouteOptimizationException('Route optimization type must be defined before calling formatRequest()');
+        }
 
         if ($this->type === RouteOptimizationTypeEnum::MIN_TRAVEL_TIME) {
             unset($dataSearch['model']['vehicles'][0]['costPerKilometer']);
@@ -73,21 +84,21 @@ trait HelpersRouteOptimization
     /**
      * Format the response from the API to an OptimizedWaypointsDTO object
      * @param array $response the response from the API
-     * @throws \Exception
+     * @throws RouteOptimizationException when the response has an error
      * @return OptimizedWaypointsDTO
      */
     public function formatResponse(array $response): OptimizedWaypointsDTO
     {
         if ($response['error'] ?? false) {
-            throw new Exception($response['response'], $response['code']);
+            throw new RouteOptimizationException($response['response']);
         }
-
-        $aggregatedRouteMetrics = $response['metrics']['aggregatedRouteMetrics'] ?? [];
+        
+        $aggregatedRouteMetrics = Arr::get($response, 'metrics.aggregatedRouteMetrics', []);
         $distanceInMeters = (int) $aggregatedRouteMetrics['travelDistanceMeters'] ?? 0;
         $durationInSeconds = (int) $aggregatedRouteMetrics['travelDuration'] ?? 0;
 
         if ($distanceInMeters == 0) {
-            throw new Exception('Distance can not be zero', 404);
+            throw new RouteOptimizationException('Distance can not be zero');
         }
 
         $distanceInKilometers = round(($distanceInMeters / 1000), 2);

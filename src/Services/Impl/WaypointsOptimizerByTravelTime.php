@@ -5,9 +5,9 @@ use BeeDelivery\GoogleMaps\DTOs\OptimizedWaypointsDTO;
 use BeeDelivery\GoogleMaps\DTOs\OptimizeWaypointsDTO;
 use BeeDelivery\GoogleMaps\DTOs\WaypointDTO;
 use BeeDelivery\GoogleMaps\Enums\WaypointsOptimizerType;
+use BeeDelivery\GoogleMaps\Exceptions\RoutesException;
 use BeeDelivery\GoogleMaps\Services\Contracts\WaypointsOptimizer;
 use BeeDelivery\GoogleMaps\Services\Routes;
-use Exception;
 
 class WaypointsOptimizerByTravelTime implements WaypointsOptimizer
 {
@@ -19,7 +19,7 @@ class WaypointsOptimizerByTravelTime implements WaypointsOptimizer
     /**
      * Optimize the waypoints by travel time
      * @param OptimizeWaypointsDTO $optimizeWaypointsDTO
-     * @throws Exception
+     * @throws RoutesException when the response code is not 200
      * @return OptimizedWaypointsDTO
      */
     public function optimize(OptimizeWaypointsDTO $optimizeWaypointsDTO): OptimizedWaypointsDTO
@@ -31,8 +31,8 @@ class WaypointsOptimizerByTravelTime implements WaypointsOptimizer
         );
         
         if (isset($response['code'])) {
-            throw new Exception("Failed to optimize waypoints by travel time,
-            code: {$response['code']}, message: {$response['response']}", $response['code']);
+            throw new RoutesException("Failed to optimize waypoints by travel time,
+            code: {$response['code']}, message: {$response['response']}");
         }
         
         return new OptimizedWaypointsDTO(
