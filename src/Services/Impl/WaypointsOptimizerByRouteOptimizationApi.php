@@ -5,10 +5,10 @@ namespace BeeDelivery\GoogleMaps\Services\Impl;
 use BeeDelivery\GoogleMaps\DTOs\OptimizedWaypointsDTO;
 use BeeDelivery\GoogleMaps\DTOs\OptimizeWaypointsDTO;
 use BeeDelivery\GoogleMaps\Enums\RouteOptimizationTypeEnum;
+use BeeDelivery\GoogleMaps\Exceptions\RouteOptimizationApiAuthException;
 use BeeDelivery\GoogleMaps\Services\Contracts\WaypointsOptimizer;
 use BeeDelivery\GoogleMaps\Utils\Connection;
 use BeeDelivery\GoogleMaps\Utils\HelpersRouteOptimization;
-use Exception;
 use Google\Client;
     
 
@@ -22,9 +22,7 @@ class WaypointsOptimizerByRouteOptimizationApi implements WaypointsOptimizer
     )
     {
         $this->http = new Connection();
-        $this->apiClient = new Client();
-        $this->apiClient->setAuthConfig(config('googlemaps.route_optimization_api.service_account_credentials'));
-        $this->apiClient->addScope(config('googlemaps.route_optimization_api.scope'));
+        $this->initializeApiClient();
     }
     
     public function optimize(OptimizeWaypointsDTO $optimizeWaypointsDTO): OptimizedWaypointsDTO
@@ -33,7 +31,7 @@ class WaypointsOptimizerByRouteOptimizationApi implements WaypointsOptimizer
         ->fetchAccessTokenWithAssertion()['access_token'] ?? '';
         
         if (empty($token)) {
-            throw new Exception('Failed to get access token for route optimization');
+            throw new RouteOptimizationApiAuthException();
         }
         return $this->formatResponse(
             response: $this->http->post(
@@ -42,6 +40,21 @@ class WaypointsOptimizerByRouteOptimizationApi implements WaypointsOptimizer
                 headers: ['Authorization' => "Bearer $token"]
             ),
         );
+    }
+
+    private function initializeApiClient(): void
+    {
+        $this->apiClient = new Client();
+        $authConfig = config('googlemaps.route_optimization_api.service_account_credentials');
+        $scope = config('googlemaps.route_optimization_api.scope');
+        if (empty($authConfig)) {
+            throw new RouteOptimizationApiAuthException('Service account credentials for route optimization API not found');
+        }
+        if (empty($scope)) {
+            throw new RouteOptimizationApiAuthException('Scope for route optimization API not found');
+        }
+        $this->apiClient->setAuthConfig($authConfig);
+        $this->apiClient->addScope($scope);
     }
 
 }
