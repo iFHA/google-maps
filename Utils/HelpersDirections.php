@@ -35,6 +35,13 @@ trait HelpersDirections
 
     public function formatResponse(array $response): array
     {
+        if (isset($response['error'])) {
+            return [
+                'code' => $response['error']['code'],
+                'message' => $response['error']['message']
+            ];
+        }
+
         $distance = (int) $response['routes'][0]['distanceMeters'] ?? 0;
         $duration = (int) $response['routes'][0]['duration'] ?? 0;
 

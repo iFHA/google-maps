@@ -31,7 +31,8 @@ class RoutesTest extends TestCase
 
         dd(
             $routes->routes($origin, $destination, $waypoints, false),
-            $routes->routes($origin, $destination, $waypoints)
+            $routes->routes($origin, $destination, $waypoints),
+            $routes->routesPersonFieldMask('routes.optimized_intermediate_waypoint_index,routes.legs.distanceMeters', $origin, $destination, $waypoints),
         );
     }
 }
