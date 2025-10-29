@@ -62,6 +62,13 @@ trait HelpersRoutes
 
     public function formatResponse(array $response): array
     {
+        if (isset($response['error'])) {
+            return [
+                'code' => $response['error']['code'],
+                'message' => $response['error']['message']
+            ];
+        }
+
         $distance = (int) $response['routes'][0]['distanceMeters'] ?? 0;
         $duration = (int) $response['routes'][0]['duration'] ?? 0;
 
@@ -76,6 +83,18 @@ trait HelpersRoutes
             'duration_in_minutes' => number_format(($duration / 60), 2),
             'waypoint_order' => $response['routes'][0]['optimizedIntermediateWaypointIndex'] ?? '',
         ];
+
+        return $response;
+    }
+
+    public function formatCompleteResponse(array $response): array
+    {
+        if (isset($response['error'])) {
+            return [
+                'code' => $response['error']['code'],
+                'message' => $response['error']['message']
+            ];
+        }
 
         return $response;
     }

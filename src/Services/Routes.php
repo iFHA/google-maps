@@ -43,4 +43,27 @@ class Routes
             ];
         }
     }
+
+    /*     
+     * @param array $params
+     * @return array
+     * @throws \Exception
+     */
+    public function routesPersonFieldMask(string $personFieldMask, array $origin, array $destination, array $waypoints = [], bool $optimize =  true, string $mode = 'DRIVE'): array
+    {
+        try {
+            return $this->formatCompleteResponse(
+                $this->http->post(
+                    $this->url(),
+                    $this->formatRequest($origin, $destination, $waypoints, $optimize, $mode),
+                    $personFieldMask
+                )
+            );
+        } catch (\Exception $e) {
+            return [
+                'code' => $e->getCode(),
+                'response' => $e->getMessage()
+            ];
+        }
+    }
 }
